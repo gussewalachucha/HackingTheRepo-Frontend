@@ -56,6 +56,26 @@ describe("jobs", () => {
     expect(res.body.code).toBe("SETTINGS_REQUIRED");
   });
 
+  it("creates a job without a personal Groq key and lets RepoMind use its own", async () => {
+    vi.spyOn(axios, "post").mockResolvedValue({ data: { job_id: "rm-2" } });
+    const { token } = await createUserAndToken({
+      username: "nogroq",
+      email: "nogroq@example.com",
+      groqKey: null,
+    });
+
+    const res = await agent(app)
+      .post("/api/jobs")
+      .set(authHeader(token))
+      .send({ repoUrl: "https://github.com/a/b", instruction: "add tests" });
+
+    expect(res.status).toBe(201);
+    expect(axios.post).toHaveBeenCalledWith(
+      "http://repomind.test/run",
+      expect.objectContaining({ llm_provider: "groq", llm_api_key: undefined }),
+    );
+  });
+
   it("creates job and dispatches to RepoMind", async () => {
     vi.spyOn(axios, "post").mockResolvedValue({ data: { job_id: "rm-1" } });
     const { token } = await createUserAndToken({

@@ -58,7 +58,7 @@ export async function createUserAndToken(overrides = {}) {
     githubToken: stripSecrets
       ? ""
       : encryptSecret(githubToken || "ghp_testtoken1234"),
-    groqKey: stripSecrets
+    groqKey: stripSecrets || groqKey === null
       ? ""
       : encryptSecret(groqKey || "gsk_testgroq1234"),
   });

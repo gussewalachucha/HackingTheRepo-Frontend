@@ -71,12 +71,13 @@ router.post("/", protect, validate(createJobSchema), async (req, res) => {
 
     const user = await User.findById(req.user._id);
     const githubToken = decryptSecret(user?.githubToken);
-    const groqKey = decryptSecret(user?.groqKey);
 
-    if (!githubToken || !groqKey) {
+    // The Groq key is optional: without one, RepoMind falls back to the
+    // GROQ_API_KEY configured on its own server.
+    if (!githubToken) {
       return res.status(400).json({
         message:
-          "Save your GitHub token and Groq key in Settings before creating a job",
+          "Save your GitHub token in Settings (or sign in with GitHub) before creating a job",
         code: "SETTINGS_REQUIRED",
       });
     }
